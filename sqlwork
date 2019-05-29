@@ -1,0 +1,426 @@
+SHOW DATABASES;
+
+DROP DATABASE IF EXISTS sql_bootcamp;
+
+CREATE DATABASE sql_bootcamp;
+
+SHOW DATABASES;
+
+USE sql_bootcamp; 
+
+DROP TABLE IF EXISTS sql_bootcamp_students;
+
+CREATE TABLE sql_bootcamp_students (
+	person_id INT NOT NULL AUTO_INCREMENT, 
+	first_name VARCHAR(30) NOT NULL,
+	last_name VARCHAR(30),
+	age INT,
+	job_title VARCHAR(50),
+    PRIMARY KEY (person_id)
+);
+
+SHOW TABLES;
+
+DESCRIBE sql_bootcamp_students;
+
+
+
+/******************************************************************************
+***** ADDING, QUERYING, AND REMOVING DATA *****
+******************************************************************************/
+
+INSERT INTO sql_bootcamp_students (first_name, last_name, age, job_title)
+VALUES ('Santiago', 'Hernandez', 27, 'Business Analyst');
+
+SELECT first_name, last_name, age, job_title
+FROM sql_bootcamp_students;
+
+SELECT *
+FROM sql_bootcamp_students;
+
+ALTER TABLE sql_bootcamp_students
+ADD sector VARCHAR(30);
+
+UPDATE sql_bootcamp_students
+SET sector = 'Private'
+WHERE last_name = 'Burroughs';
+
+UPDATE sql_bootcamp_students
+SET sector = 'Private'
+WHERE person_id = 1;
+
+INSERT INTO sql_bootcamp_students (first_name, last_name, age, job_title, sector)
+VALUES ("Faheem", "Khemani", 26, "Associate Product Manager", "Private");
+
+INSERT INTO sql_bootcamp_students (first_name, last_name, age, job_title, sector)
+VALUES (first_name, last_name, age, job_title, sector);
+
+SELECT job_title
+FROM sql_bootcamp_students;
+
+SELECT DISTINCT job_title
+FROM sql_bootcamp_students;
+
+SELECT * 
+FROM sql_bootcamp_students
+ORDER BY age;
+
+SELECT *
+FROM sql_bootcamp_students
+ORDER BY age DESC;
+
+DELETE FROM sql_bootcamp_students
+WHERE person_id = 1;
+
+SELECT *
+FROM sql_bootcamp_students;
+
+DROP TABLE sql_bootcamp_students;
+
+SHOW TABLES;
+
+DROP TABLE IF EXISTS user_logs;
+CREATE TABLE user_logs (
+	event_id INT NOT NULL AUTO_INCREMENT,
+	time_stamp TIMESTAMP NOT NULL,
+	user_id INT NOT NULL,
+	user_logged_in BOOLEAN,
+	resolution_id INT,
+	duration_on_page FLOAT(6,2),
+	PRIMARY KEY (event_id)
+);
+
+DROP TABLE IF EXISTS user_profiles;
+CREATE TABLE user_profiles (
+	user_id INT NOT NULL,
+	user_screen_name VARCHAR(25) NOT NULL,
+	user_full_name VARCHAR(50),
+	user_created_date TIMESTAMP NOT NULL,
+	user_country VARCHAR(50),
+	newsletter BOOLEAN NOT NULL,
+	PRIMARY KEY (user_id)
+);
+
+DROP TABLE IF EXISTS screen_resolutions;
+CREATE TABLE screen_resolutions (
+	resolution_id INT NOT NULL,
+	screen_resolution VARCHAR(12) NOT NULL,
+	PRIMARY KEY (resolution_id)
+);
+
+
+LOAD DATA LOCAL INFILE "<file_path_to_downloaded_folder>/sql_bootcamp/Data/user_logs.csv"
+INTO TABLE user_logs 
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(time_stamp, user_id, user_logged_in, resolution_id, duration_on_page);
+
+LOAD DATA LOCAL INFILE "<file_path_to_downloaded_folder>/sql_bootcamp/Data/user_profiles.csv"
+INTO TABLE user_profiles 
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+LOAD DATA LOCAL INFILE "<file_path_to_downloaded_folder>/sql_bootcamp/Data/screen_resolutions.csv"
+INTO TABLE screen_resolutions 
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+
+
+/******************************************************************************
+***** EXPLORING, DISCOVERING, AND AGGREGATING DATA *****
+******************************************************************************/
+
+SELECT * 
+FROM user_profiles
+LIMIT 15;
+
+SELECT * 
+FROM screen_resolutions;
+
+SELECT COUNT(*)
+FROM user_logs;
+
+SELECT COUNT(*) AS 'row_count'
+FROM user_logs;
+
+SELECT * 
+FROM user_logs
+LIMIT 15;
+
+SELECT MIN(duration_on_page) AS 'min_dur', MAX(duration_on_page) AS 'max_dur',
+AVG(duration_on_page) AS 'avg_dur'
+FROM user_logs;
+
+SELECT *
+FROM user_logs
+WHERE duration_on_page > 20;
+
+SELECT COUNT(*)
+FROM user_logs
+WHERE duration_on_page > 20;
+
+SELECT COUNT(*)
+FROM user_logs
+WHERE duration_on_page > 10 AND duration_on_page < 15;
+
+SELECT COUNT(*)
+FROM user_logs
+WHERE duration_on_page < 10 OR duration_on_page > 15;
+
+
+SELECT COUNT(*)
+FROM user_logs
+WHERE user_logged_in = 0;
+
+SELECT COUNT(*)
+FROM user_logs
+WHERE user_logged_in = 1;
+
+SELECT COUNT(*)
+FROM user_logs
+GROUP BY user_logged_in;
+
+SELECT user_logged_in, COUNT(*)
+FROM user_logs
+GROUP BY user_logged_in;
+
+SELECT user_logged_in, AVG(duration_on_page)
+FROM user_logs
+GROUP BY user_logged_in;
+
+SELECT resolution_id, AVG(duration_on_page)
+FROM user_logs
+GROUP BY resolution_id;
+
+SELECT resolution_id, MAX(duration_on_page)
+FROM user_logs
+GROUP BY resolution_id;
+
+SELECT *
+FROM screen_resolutions;
+
+
+
+/******************************************************************************
+***** JOINING TABLES *****
+******************************************************************************/
+
+
+SELECT *
+FROM user_logs 
+LEFT JOIN screen_resolutions
+ON user_logs.resolution_id = screen_resolutions.resolution_id
+LIMIT 15;
+
+SELECT * 
+FROM user_logs a
+LEFT JOIN screen_resolutions b
+ON a.resolution_id = b.resolution_id
+LIMIT 15;
+
+SELECT b.screen_resolution, a.duration_on_page
+FROM user_logs a
+LEFT JOIN screen_resolutions b
+ON a.resolution_id = b.resolution_id
+LIMIT 15;
+
+SELECT b.screen_resolution, MAX(a.duration_on_page)
+FROM user_logs a
+LEFT JOIN screen_resolutions b
+ON a.resolution_id = b.resolution_id
+GROUP BY a.resolution_id;
+
+
+
+/******************************************************************************
+***** MORE QUERIES AND AGGREGATIONS *****
+******************************************************************************/
+
+SELECT *
+FROM user_profiles
+LIMIT 15;
+
+SELECT COUNT(DISTINCT user_country)
+FROM user_profiles;
+
+SELECT DISTINCT user_country
+FROM user_profiles;
+
+SELECT user_country, COUNT(user_country) 
+FROM user_profiles
+GROUP BY user_country;
+
+SELECT COUNT(*) 
+FROM user_profiles;
+
+SELECT user_country, COUNT(user_country)/1001*100
+FROM user_profiles
+GROUP BY user_country;
+
+SELECT user_country, COUNT(user_country)/(SELECT COUNT(*) FROM user_profiles)*100
+FROM user_profiles
+GROUP BY user_country;
+
+SELECT COUNT(newsletter)
+FROM user_profiles
+WHERE newsletter = 1;
+
+SELECT SUM(newsletter)
+FROM user_profiles;
+
+SELECT * 
+FROM user_profiles
+WHERE user_full_name LIKE 'b%';
+
+SELECT COUNT(*) 
+FROM user_profiles
+WHERE user_full_name LIKE 'b%';
+
+SELECT COUNT(*)
+FROM user_profiles
+WHERE user_full_name IS NULL;
+
+SELECT COUNT(*)
+FROM user_profiles
+WHERE user_full_name IS NOT NULL;
+
+
+
+/******************************************************************************
+***** CASE STATEMENTS *****
+******************************************************************************/
+
+SELECT DISTINCT user_country
+FROM user_profiles;
+
+SELECT CASE
+		WHEN user_country = 'USA' OR user_country = 'Canada' OR user_country = 'Mexico' THEN 'North America'
+		WHEN user_country = 'England' OR user_country = 'France' OR user_country = 'Germany' THEN 'Europe'
+		ELSE 'Not a continent!'
+	END AS 'continent'
+FROM user_profiles
+LIMIT 15;
+
+SELECT CASE
+		WHEN user_country IN ('USA','Canada','Mexico') THEN 'North America'
+		WHEN user_country IN ('England','France','Germany') THEN 'Europe'
+		ELSE 'Not a continent!'
+	END AS 'continent'
+FROM user_profiles
+LIMIT 15;
+
+SELECT CASE
+		WHEN user_country IN ('USA','Canada','Mexico') THEN 'North America'
+		WHEN user_country IN ('England','France','Germany') THEN 'Europe'
+		ELSE 'Not a continent!'
+	END AS 'continent', COUNT(*)/(SELECT COUNT(*) FROM user_profiles)*100
+FROM user_profiles
+GROUP BY continent;
+
+
+
+/******************************************************************************
+***** MORE JOINS *****
+******************************************************************************/
+
+SELECT *
+FROM user_logs
+LIMIT 15;
+
+SELECT *
+FROM user_profiles
+LIMIT 15;
+
+SELECT *
+FROM screen_resolutions;
+
+SELECT *
+FROM user_logs a
+LEFT JOIN user_profiles b ON b.user_id = a.user_id
+LEFT JOIN screen_resolutions c ON c.resolution_id = a.resolution_id
+LIMIT 15;
+
+SELECT a.*
+	,b.user_screen_name, b.user_full_name, b.user_created_date, b.user_country, b.newsletter
+	,c.screen_resolution
+FROM user_logs a
+LEFT JOIN user_profiles b ON b.user_id = a.user_id
+LEFT JOIN screen_resolutions c ON c.resolution_id = a.resolution_id
+LIMIT 15;
+
+SELECT b.user_country, AVG(a.duration_on_page)
+FROM user_logs a
+LEFT JOIN user_profiles b ON b.user_id = a.user_id
+LEFT JOIN screen_resolutions c ON c.resolution_id = a.resolution_id
+GROUP BY b.user_country;
+
+SELECT b.newsletter, AVG(a.duration_on_page)
+FROM user_logs a
+LEFT JOIN user_profiles b ON b.user_id = a.user_id
+LEFT JOIN screen_resolutions c ON c.resolution_id = a.resolution_id
+GROUP BY b.newsletter;
+
+SELECT c.screen_resolution, AVG(a.duration_on_page)
+FROM user_logs a
+LEFT JOIN user_profiles b ON b.user_id = a.user_id
+LEFT JOIN screen_resolutions c ON c.resolution_id = a.resolution_id
+GROUP BY c.screen_resolution;
+
+
+
+/******************************************************************************
+***** ADVANCED QUERIES AND AGGREGATIONS *****
+******************************************************************************/
+
+SELECT MIN(time_stamp), MAX(time_stamp)
+FROM user_logs;
+
+SELECT CASE
+		WHEN time_stamp > '2012-01-01' AND time_stamp < '2013-01-01' THEN 2012
+		WHEN time_stamp > '2013-01-01' AND time_stamp < '2014-01-01' THEN 2013
+		WHEN time_stamp > '2014-01-01' AND time_stamp < '2015-01-01' THEN 2014
+		WHEN time_stamp > '2015-01-01' AND time_stamp < '2016-01-01' THEN 2015
+	END AS 'time_year', AVG(duration_on_page) AS 'avg_dur'
+FROM user_logs
+GROUP BY time_year;
+
+SELECT CASE
+		WHEN time_stamp > '2012-01-01' AND time_stamp < '2013-01-01' THEN 2012
+		WHEN time_stamp > '2013-01-01' AND time_stamp < '2014-01-01' THEN 2013
+		WHEN time_stamp > '2014-01-01' AND time_stamp < '2015-01-01' THEN 2014
+		WHEN time_stamp > '2015-01-01' AND time_stamp < '2016-01-01' THEN 2015
+	END AS 'time_year', user_logged_in, AVG(duration_on_page) AS 'avg_dur'
+FROM user_logs
+GROUP BY time_year, user_logged_in
+ORDER BY user_logged_in, time_year;
+
+SELECT AVG(duration_on_page)
+FROM user_logs
+WHERE user_id IN (
+	SELECT user_id
+	FROM user_profiles
+	WHERE user_created_date < '2010-01-01'
+);
+
+
+SELECT AVG(duration_on_page)
+FROM user_logs
+WHERE user_id IN (
+	SELECT user_id
+	FROM user_profiles
+	WHERE user_created_date < (
+			SELECT MIN(time_stamp)
+			FROM user_logs
+		)
+);
+
+SELECT CONCAT("Hi, I'm ",user_full_name," from ",user_country,"!")
+FROM user_profiles
+WHERE LENGTH(user_full_name) = (
+	SELECT MAX(LENGTH(user_full_name)) 
+	FROM user_profiles
+);
